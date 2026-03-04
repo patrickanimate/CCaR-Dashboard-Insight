@@ -1,4 +1,12 @@
-BudgetExecutionChart = {
+{
+    "version": "1.0",
+    "widgets": [
+       {
+          "widgetId": 99999,
+          ...
+       }
+    ]
+} {
     "version": "1.0",
     "widgets": [
        {
@@ -64,4 +72,5 @@ BudgetExecutionChart = {
           }
        }
     ]
-};
+}
+
