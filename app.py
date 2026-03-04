@@ -9,20 +9,23 @@ client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 st.set_page_config(layout="wide", page_title="CCaR Insights Prototype")
 
-# Custom CSS for high-fidelity cards and sparkle button
+# Custom CSS - FIXED: Corrected color codes and syntax
 st.markdown("""
 <style>
     /* Card borders and padding */
     .kpi-card { border-radius: 10px; padding: 20px; text-align: center; border: 1px solid #334155; margin-bottom: 20px; }
     .insight-card { border-radius: 8px; border-left: 5px solid #3b82f6; padding: 15px; margin-bottom: 12px; border: 1px solid #334155; }
     
-    /* Sparkle Button styling */
-    .sparkle-btn { cursor: pointer; font-size: 24px; transition: 0.3s; }
-    .sparkle-btn:hover { transform: scale(1.2); color: ##3b82f6;}
-}
-    .sparkle-btn:hover { 
-        transform: scale(1.2); 
-        color: #60a5fa; /
+    /* Sparkle Button styling - FIXED blue color */
+    .stButton>button {
+        color: #3b82f6 !important; /* Forces the sparkle icon to be blue */
+        border: none !important;
+        background: transparent !important;
+        font-size: 24px !important;
+    }
+    .stButton>button:hover {
+        transform: scale(1.2);
+        color: #60a5fa !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -33,9 +36,10 @@ if 'ai_generated' not in st.session_state:
 if 'ai_content' not in st.session_state:
     st.session_state.ai_content = {"summary": "", "insights": [], "actions": []}
 
-# 3. DATA LOAD (From your JSON)
+# 3. DATA LOAD
 with open('Budget Execution Chart Data.json', 'r') as f:
     content = f.read()
+    # Handle the JS variable assignment if present
     json_string = content.split('=', 1)[-1].strip().rstrip(';')
     data_raw = json.loads(json_string)
 
@@ -45,9 +49,9 @@ chart_data = data_raw["widgets"][0]["chart"]
 def trigger_intelligence():
     st.session_state.ai_generated = True
     # System Prompt for dynamic generation
-    sys_prompt = f"Analyze this CCaR data and generate: 1. A summary, 2. Four key insights, 3. Two actions. Data: {json.dumps(data_raw)}"
+    sys_prompt = f"Analyze this CCaR data: {json.dumps(data_raw)}. Generate a summary, 4 insights, and 2 actions."
     
-    # This is where your live OpenAI call will populate the content
+    # Placeholder for OpenAI call - Logic would go here
     st.session_state.ai_content = {
         "summary": "AI Generated Summary would appear here based on your prompt...",
         "insights": ["Insight 1", "Insight 2", "Insight 3", "Insight 4"],
@@ -66,9 +70,9 @@ st.divider()
 left, right = st.columns([2.2, 1])
 
 with left:
-    # SPARKLE ICON TRIGGER
     col_chart, col_sparkle = st.columns([0.95, 0.05])
     with col_sparkle:
+        # Use button with blue CSS applied
         if st.button("✨", help="Generate AI Insights"):
             trigger_intelligence()
 
@@ -80,24 +84,16 @@ with left:
     fig = px.line(df, x="Month", y=[s["label"] for s in chart_data["series"]], 
                   markers=True, template="plotly_dark")
     
-    # 1. Force tooltip to show Dollar Amount prominently
+    # Hover Priority: Dollar Amount
     fig.update_traces(hovertemplate='<b>%{y}M</b><br>%{x}') 
     
-    # 2. Move Legend to bottom (Corrected placement)
+    # Legend at Bottom
     fig.update_layout(
-        legend=dict(
-            orientation="h",   # horizontal
-            yanchor="bottom",
-            y=-0.5,            # pushes it below the chart
-            xanchor="center",
-            x=0.5              # centers it
-        )
+        legend=dict(orientation="h", yanchor="bottom", y=-0.5, xanchor="center", x=0.5)
     )
 
-    # 3. Render the single chart
     st.plotly_chart(fig, use_container_width=True)
     
-    # TABBED SUMMARY SECTION
     tab_summary, tab_desc = st.tabs(["📝 Summary", "ℹ️ Description"])
     with tab_summary:
         if st.session_state.ai_generated:
@@ -108,8 +104,8 @@ with left:
 with right:
     st.markdown("### 🤖 AI-Powered Insights")
     
-    # Wrap the AI results in a collapsible expander
     if st.session_state.ai_generated:
+        # Collapsible drawer for AI content
         with st.expander("View Generated Intelligence", expanded=True):
             for insight in st.session_state.ai_content["insights"]:
                 st.markdown(f'<div class="insight-card">{insight}</div>', unsafe_allow_html=True)
