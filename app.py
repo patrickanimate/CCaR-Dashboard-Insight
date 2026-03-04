@@ -88,6 +88,7 @@ def toggle_intelligence():
         You must format your findings for a mixed audience (Commanders, Analysts, Resource Advisors).
         Tone: Objective, application-focused, and highly professional.
         Structure: Every insight must stack "**Observation:**" and "**Impact:**" using markdown line breaks (\\n\\n).
+        Formatting Rule: ALL numeric values must be properly formatted as currency with an "M" suffix for millions or "K" for thousands (e.g., "$5.8M", "$25.0M"). Do not output raw floats.
         
         REQUIRED OUTPUT SCHEMA
         Return ONLY a valid JSON object matching the exact structure below. Output exactly 3 insights (one for each Gate) and 2 to 3 specific actions.
