@@ -66,7 +66,6 @@ def toggle_intelligence():
     st.session_state.show_insights = not st.session_state.show_insights
     
     if st.session_state.show_insights and not st.session_state.data_fetched:
-        # UPDATED: New SIP Logic Signature Prompt
         prompt = f"""
         You are an expert DoD Financial Analyst Agent operating as the Sovereign Intelligence Platform (SIP) logic engine for CCaR. Your objective is to process the provided Budget Execution Chart Data and return a deterministic, highly structured assessment.
         You must not hallucinate, you must not calculate math without index-matching, and you must not invent business context (e.g., do not guess about "payment delays").
@@ -197,20 +196,26 @@ with right:
         st.markdown("### 🤖 AI-Powered Insights")
         
         border_colors = ["#8db6d9", "#f5b066", "#9bd3a1", "#94a3b8"]
-        # UPDATED: Use insight["value"] instead of description to match the new schema
+        
+        # BULLETPROOF FIX: Safely handles both Strings (old format) and Dictionaries (new format)
         for i, insight in enumerate(st.session_state.ai_content.get("insights", [])):
             b_color = border_colors[i % len(border_colors)]
+            
+            # Check if AI returned a dictionary (correct) or a string (hallucination/cached)
+            i_title = insight.get("title", "") if isinstance(insight, dict) else "Insight"
+            i_text = insight.get("value", insight.get("description", "")) if isinstance(insight, dict) else str(insight)
+            
             st.markdown(f'''
                 <div class="insight-card" style="border-left: 5px solid {b_color};">
-                    <div class="insight-title">{insight.get("title", "")}</div>
-                    <div class="insight-text">{insight.get("value", "")}</div>
+                    <div class="insight-title">{i_title}</div>
+                    <div class="insight-text">{i_text}</div>
                 </div>
             ''', unsafe_allow_html=True)
         
         st.markdown("### ✅ Recommended Actions")
-        # UPDATED: Use action["value"] because actions are now objects, not plain strings
         for action in st.session_state.ai_content.get("actions", []):
-            st.success(action.get("value", ""))
+            a_text = action.get("value", "") if isinstance(action, dict) else str(action)
+            st.success(a_text)
             
         st.divider()
         
