@@ -15,7 +15,9 @@ st.markdown("""
     .kpi-card { border-radius: 10px; padding: 20px; text-align: center; border: 1px solid rgba(128, 128, 128, 0.2); margin-bottom: 20px; }
     .insight-card { border-radius: 8px; padding: 15px; margin-bottom: 12px; border-top: 1px solid rgba(128, 128, 128, 0.2); border-right: 1px solid rgba(128, 128, 128, 0.2); border-bottom: 1px solid rgba(128, 128, 128, 0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.05); background-color: transparent; }
     .insight-title { font-weight: bold; font-size: 1.05rem; margin-bottom: 6px; }
-    .insight-text { font-size: 0.9rem; line-height: 1.4; opacity: 0.75; }
+    
+    /* ADDED: white-space: pre-wrap; ensures \n\n renders as actual line breaks in the UI */
+    .insight-text { font-size: 0.9rem; line-height: 1.4; opacity: 0.75; white-space: pre-wrap; }
     
     /* Sparkle Button */
     div.stButton > button {
@@ -89,27 +91,27 @@ def toggle_intelligence():
         PHASE 3: OUTPUT SYNTHESIS
         You must format your findings for a mixed audience (Commanders, Analysts, Resource Advisors).
 
-        Tone: Objective, BLUF (Bottom Line Up Front), and highly professional.
-        Structure: Every insight must use the strict "What we see / Why it matters" structure.
-        Actions: Every action must use the "What to consider" structure.
+        Tone: Objective, application-focused, and highly professional.
+        Structure: Every insight must stack "**Observation:**" and "**Impact:**" on separate lines using markdown bolding and line breaks (\\n\\n) for readability.
+        Actions: Provide only the direct actionable review step. Do not use prefixes like "Recommended Review:" inside the text, as the application UI will provide the section header.
         
         REQUIRED OUTPUT SCHEMA
         You must return ONLY a valid JSON object matching the exact structure below. Do not wrap it in markdown code blocks (no ```json). Do not include conversational filler.
         {{
-            "summary": "[1 to 2 sentences summarizing overall execution health based on Gate A and Gate B. Be concise.]",
+            "summary": "[2 to 3 sentences providing an executive overview. Sentence 1: State the overall execution health and alignment with OSD goals based on Gate A. Sentence 2: Contextualize this health by identifying the primary driver from the data (e.g., a specific baseline vs. forecast variance, or deferred funds).]",
             "insights": [
                 {{
                     "title": "[Short, professional headline, e.g., 'Significant Forecast Reduction']",
-                    "value": "What we see: [1 sentence stating the exact numeric variance from the data]. Why it matters: [1 sentence stating the objective financial impact or risk]."
+                    "value": "**Observation:** [1 sentence stating the exact numeric variance from the data].\\n\\n**Impact:** [1 sentence stating the objective financial consequence or risk]."
                 }},
                 {{
                     "title": "[Short, professional headline, e.g., 'Execution vs. OSD Goal']",
-                    "value": "What we see: [1 sentence stating Actuals vs Goals]. Why it matters: [1 sentence explaining if the portfolio is keeping pace]."
+                    "value": "**Observation:** [1 sentence stating Actuals vs Goals].\\n\\n**Impact:** [1 sentence explaining if the portfolio is keeping pace or falling behind]."
                 }}
             ],
             "actions": [
                 {{
-                    "value": "What to consider: [1 concise sentence suggesting what the analyst should review next in CCaR to validate the findings. Do not prescribe policy decisions.]"
+                    "value": "[1 concise sentence suggesting what the analyst should investigate next in CCaR to validate the findings. Provide the direct action only (no prefixes). Do not prescribe policy decisions.]"
                 }}
             ]
         }}
@@ -197,20 +199,23 @@ with right:
         
         border_colors = ["#8db6d9", "#f5b066", "#9bd3a1", "#94a3b8"]
         
-        # BULLETPROOF FIX: Safely handles both Strings (old format) and Dictionaries (new format)
         for i, insight in enumerate(st.session_state.ai_content.get("insights", [])):
             b_color = border_colors[i % len(border_colors)]
             
-            # Check if AI returned a dictionary (correct) or a string (hallucination/cached)
             i_title = insight.get("title", "") if isinstance(insight, dict) else "Insight"
             i_text = insight.get("value", insight.get("description", "")) if isinstance(insight, dict) else str(insight)
             
+            # Use st.markdown directly instead of HTML div for the inner text so Streamlit natively parses the **bold** tags
             st.markdown(f'''
                 <div class="insight-card" style="border-left: 5px solid {b_color};">
                     <div class="insight-title">{i_title}</div>
-                    <div class="insight-text">{i_text}</div>
-                </div>
+                    <div class="insight-text">
             ''', unsafe_allow_html=True)
+            
+            # This allows the markdown bolding to work inside the HTML container
+            st.markdown(i_text)
+            
+            st.markdown('</div></div>', unsafe_allow_html=True)
         
         st.markdown("### ✅ Recommended Actions")
         for action in st.session_state.ai_content.get("actions", []):
