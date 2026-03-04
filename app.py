@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import json
+import re
 from openai import OpenAI
 
 # 1. INITIALIZE AI CLIENT
@@ -15,9 +16,7 @@ st.markdown("""
     .kpi-card { border-radius: 10px; padding: 20px; text-align: center; border: 1px solid rgba(128, 128, 128, 0.2); margin-bottom: 20px; }
     .insight-card { border-radius: 8px; padding: 15px; margin-bottom: 12px; border-top: 1px solid rgba(128, 128, 128, 0.2); border-right: 1px solid rgba(128, 128, 128, 0.2); border-bottom: 1px solid rgba(128, 128, 128, 0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.05); background-color: transparent; }
     .insight-title { font-weight: bold; font-size: 1.05rem; margin-bottom: 6px; }
-    
-    /* ADDED: white-space: pre-wrap; ensures \n\n renders as actual line breaks in the UI */
-    .insight-text { font-size: 0.9rem; line-height: 1.4; opacity: 0.75; white-space: pre-wrap; }
+    .insight-text { font-size: 0.9rem; line-height: 1.4; opacity: 0.75; }
     
     /* Sparkle Button */
     div.stButton > button {
@@ -205,17 +204,18 @@ with right:
             i_title = insight.get("title", "") if isinstance(insight, dict) else "Insight"
             i_text = insight.get("value", insight.get("description", "")) if isinstance(insight, dict) else str(insight)
             
-            # Use st.markdown directly instead of HTML div for the inner text so Streamlit natively parses the **bold** tags
+            # --- THE FIX: Convert Markdown to HTML before injecting into the single div ---
+            # Replace **bold** with <strong>bold</strong>
+            i_text_html = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', i_text)
+            # Replace newlines with <br> breaks
+            i_text_html = i_text_html.replace('\n', '<br>')
+            
             st.markdown(f'''
                 <div class="insight-card" style="border-left: 5px solid {b_color};">
                     <div class="insight-title">{i_title}</div>
-                    <div class="insight-text">
+                    <div class="insight-text">{i_text_html}</div>
+                </div>
             ''', unsafe_allow_html=True)
-            
-            # This allows the markdown bolding to work inside the HTML container
-            st.markdown(i_text)
-            
-            st.markdown('</div></div>', unsafe_allow_html=True)
         
         st.markdown("### ✅ Recommended Actions")
         for action in st.session_state.ai_content.get("actions", []):
