@@ -2,11 +2,46 @@ import streamlit as st
 import json
 import pandas as pd
 import plotly.graph_objects as go
+import os
 
-# Load the cleaned JSON file
-with open('budget_data.json', 'r') as f:
-    raw_data = json.load(f)
+st.set_page_config(layout="wide")
 
-# Navigate to the chart section within your specific JSON structure
-data_json = raw_data["widgets"][0] # This enters the 'widgets' list to the first item
-chart_meta = data_json["chart"]["meta"] # Accesses title, subtitle, etc.
+# Use the exact filename from your GitHub
+filename = "Budget Execution Chart Data.json"
+
+if not os.path.exists(filename):
+    st.error(f"File '{filename}' not found. Check your GitHub file name!")
+else:
+    with open(filename, 'r') as f:
+        content = f.read()
+        # This removes "BudgetExecutionChart =" and the ending ";" 
+        # so Python can read it as JSON
+        json_string = content.split('=', 1)[-1].strip().rstrip(';')
+        raw_data = json.loads(json_string)
+
+    # Navigating your specific JSON structure
+    data_json = raw_data["widgets"][0]
+    chart_data = data_json["chart"]
+    
+    # 1. Metrics / KPIs
+    kpi_list = chart_data["kpis"]
+    cols = st.columns(len(kpi_list))
+    for i, kpi in enumerate(kpi_list):
+        cols[i].metric(kpi["label"], f"${kpi['value']/1000000:,.1f}M")
+
+    # 2. The Chart
+    fig = go.Figure()
+    for s in chart_data["series"]:
+        fig.add_trace(go.Scatter(
+            x=chart_data["xcategories"], 
+            y=s["data"], 
+            name=s["label"],
+            mode='lines+markers'
+        ))
+
+    fig.update_layout(
+        title=chart_data["meta"]["title"],
+        template="plotly_dark",
+        height=600
+    )
+    st.plotly_chart(fig, use_container_width=True)
