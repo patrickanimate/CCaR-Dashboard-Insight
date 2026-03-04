@@ -68,49 +68,51 @@ def toggle_intelligence():
     
     if st.session_state.show_insights and not st.session_state.data_fetched:
         prompt = f"""
-        You are an expert DoD Financial Analyst Agent operating as the Sovereign Intelligence Platform (SIP) logic engine for CCaR. Your objective is to process the provided Budget Execution Chart Data and return a deterministic, highly structured assessment.
+        You are a senior DoD Financial Analyst Agent operating as the Sovereign Intelligence Platform (SIP) logic engine for CCaR. Your objective is to process the provided Budget Execution Chart Data and return a deterministic, highly structured assessment.
         You must not hallucinate, you must not calculate math without index-matching, and you must not invent business context (e.g., do not guess about "payment delays").
 
         PHASE 1: DATA GROUNDING & EXTRACTION
-        Before generating any insight, you must internally isolate the "Current State" using these exact steps:
+        Before generating any insight, you must internally isolate the "Current State" and "End of Year (EOY) State" using these exact steps:
+        1. Find the "Current Month": Locate the index position of the LAST non-null value in the "CCaR Actuals" array.
+        2. Extract Current Month Values: Extract the exact numerical value at that index for "CCaR Actuals" and "OSD Goals".
+        3. Extract EOY Values: Locate the "SEP" (September) index or the final numerical month index. Extract the exact numerical values for "Baseline Forecast", "Current Forecast", and "Budget Authorized".
 
-        Locate the "CCaR Actuals" array. Find the index position of the LAST non-null value. This is the "Current Month".
-        Extract the exact numerical value at that exact index for:
-        CCaR Actuals (Obligations)
-        OSD Goals (Minimum cumulative targets)
-        Current Forecast (Expected execution)
-        
         PHASE 2: DETERMINISTIC LOGIC GATES
-        Evaluate the extracted numbers through these strict financial rules:
+        Evaluate the extracted numbers through these strict financial rules. You MUST base your insights on these three gates:
+        - GATE A (Pacing Check): Compare [Current Month CCaR Actuals] to [Current Month OSD Goals]. If Actuals > Goals, execution is strong. If Actuals < Goals, flag a shortfall.
+        - GATE B (Drift Check): Compare [EOY Baseline Forecast] to [EOY Current Forecast]. If the Current Forecast is lower, the plan has been reduced or deferred. State the exact numeric difference.
+        - GATE C (Authorization Gap): Compare [EOY Budget Authorized] to [EOY Current Forecast]. If Forecast < Authorized, there are unforecasted/unused funds remaining in the fiscal year.
+        - RULE: In DoD finance, DFAS (Disbursements) naturally trails CCaR (Obligations). NEVER flag a CCaR vs. DFAS lag as a risk or divergence.
 
-        GATE A (Pacing Check): Compare CCaR Actuals to OSD Goals at the Current Month index. OSD Goals are minimums. If Actuals are greater than Goals, execution is strong. If Actuals are less than Goals, flag a shortfall.
-        GATE B (Drift Check): Compare the Baseline Forecast array to the Current Forecast array. Identify if the plan was drastically reduced or shifted to the out-years ("TO COMP").
-        GATE C (Accounting Lag): Note the difference between CCaR Actuals (Obligations) and DFAS Actuals (Disbursements). In DoD finance, DFAS naturally trails CCaR. You MUST NEVER flag this lag as a "risk," "divergence," or "reconciliation issue."
-        
         PHASE 3: OUTPUT SYNTHESIS
         You must format your findings for a mixed audience (Commanders, Analysts, Resource Advisors).
-
         Tone: Objective, application-focused, and highly professional.
-        Structure: Every insight must stack "**Observation:**" and "**Impact:**" on separate lines using markdown bolding and line breaks (\\n\\n) for readability.
-        Actions: Provide only the direct actionable review step. Do not use prefixes like "Recommended Review:" inside the text, as the application UI will provide the section header.
+        Structure: Every insight must stack "**Observation:**" and "**Impact:**" using markdown line breaks (\\n\\n).
         
         REQUIRED OUTPUT SCHEMA
-        You must return ONLY a valid JSON object matching the exact structure below. Do not wrap it in markdown code blocks (no ```json). Do not include conversational filler.
+        Return ONLY a valid JSON object matching the exact structure below. Output exactly 3 insights (one for each Gate) and 2 to 3 specific actions.
         {{
-            "summary": "[2 to 3 sentences providing an executive overview. Sentence 1: State the overall execution health and alignment with OSD goals based on Gate A. Sentence 2: Contextualize this health by identifying the primary driver from the data (e.g., a specific baseline vs. forecast variance, or deferred funds).]",
+            "summary": "[2 to 3 sentences. Sentence 1: State overall execution pacing based on Gate A. Sentence 2: Contextualize the EOY trajectory based on Gates B and C (e.g., noting if funds are deferred or forecasts are reduced).]",
             "insights": [
                 {{
-                    "title": "[Short, professional headline, e.g., 'Significant Forecast Reduction']",
-                    "value": "**Observation:** [1 sentence stating the exact numeric variance from the data].\\n\\n**Impact:** [1 sentence stating the objective financial consequence or risk]."
+                    "title": "Execution vs. OSD Goal",
+                    "value": "**Observation:** [1 sentence stating Current Month Actuals vs Goals].\\n\\n**Impact:** [1 sentence explaining if the portfolio is keeping pace or falling behind]."
                 }},
                 {{
-                    "title": "[Short, professional headline, e.g., 'Execution vs. OSD Goal']",
-                    "value": "**Observation:** [1 sentence stating Actuals vs Goals].\\n\\n**Impact:** [1 sentence explaining if the portfolio is keeping pace or falling behind]."
+                    "title": "Forecast Drift & Trajectory",
+                    "value": "**Observation:** [1 sentence stating EOY Baseline vs EOY Current Forecast].\\n\\n**Impact:** [1 sentence stating the objective financial consequence of this shift]."
+                }},
+                {{
+                    "title": "Authorization Utilization",
+                    "value": "**Observation:** [1 sentence stating EOY Budget Authorized vs EOY Current Forecast].\\n\\n**Impact:** [1 sentence stating the risk of unexecuted funds or carryover]."
                 }}
             ],
             "actions": [
                 {{
-                    "value": "[1 concise sentence suggesting what the analyst should investigate next in CCaR to validate the findings. Provide the direct action only (no prefixes). Do not prescribe policy decisions.]"
+                    "value": "[1 concise sentence suggesting a specific CCaR review step based on Gate B (e.g., 'Validate the cause of the forecast reduction...'). No prefixes.]"
+                }},
+                {{
+                    "value": "[1 concise sentence suggesting a specific CCaR review step based on Gate C (e.g., 'Review unforecasted authorized funds to prevent expiration...'). No prefixes.]"
                 }}
             ]
         }}
@@ -204,10 +206,8 @@ with right:
             i_title = insight.get("title", "") if isinstance(insight, dict) else "Insight"
             i_text = insight.get("value", insight.get("description", "")) if isinstance(insight, dict) else str(insight)
             
-            # --- THE FIX: Convert Markdown to HTML before injecting into the single div ---
-            # Replace **bold** with <strong>bold</strong>
+            # --- Convert Markdown to HTML before injecting into the single div ---
             i_text_html = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', i_text)
-            # Replace newlines with <br> breaks
             i_text_html = i_text_html.replace('\n', '<br>')
             
             st.markdown(f'''
