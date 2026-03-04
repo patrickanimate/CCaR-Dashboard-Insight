@@ -80,6 +80,19 @@ with left:
     # Force tooltip to show Dollar Amount prominently
     fig.update_traces(hovertemplate='<b>%{y}M</b><br>%{x}') 
     st.plotly_chart(fig, use_container_width=True)
+    # --- ADD THESE LINES HERE ---
+    fig.update_layout(
+        legend=dict(
+            orientation="h",   # horizontal legend
+            yanchor="bottom",
+            y=-0.5,            # pushes it below the chart
+            xanchor="center",
+            x=0.5              # centers it
+        )
+    )
+    # ----------------------------
+
+    st.plotly_chart(fig, use_container_width=True)
     
     # TABBED SUMMARY SECTION
     tab_summary, tab_desc = st.tabs(["📝 Summary", "ℹ️ Description"])
