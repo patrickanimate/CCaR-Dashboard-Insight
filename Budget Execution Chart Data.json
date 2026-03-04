@@ -1,0 +1,67 @@
+BudgetExecutionChart = {
+    "version": "1.0",
+    "widgets": [
+       {
+          "widgetId": 99999,
+          "widgetTypeKey": "BUDGET_EXECUTION_SNAKE",
+          "status": "ok",
+          "message": null,
+          "errorId": null,
+          "chart": {
+             "meta": {
+                "title": "FY 2026 Budget Execution",
+                "subtitle": "Months of FY 2026",
+                "description": "Tracks budget authorization, forecasts, actuals, and OSD goals across FY 2026.",
+                "xlabel": "Month",
+                "ylabel": "USD (Millions)"
+             },
+             "series": [
+                {
+                   "label": "Baseline Forecast",
+                   "description": "Original baseline forecast established early in the fiscal year.",
+                   "type": "line",
+                   "data": [0.0, 5.8, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0]
+                },
+                {
+                   "label": "Current Forecast",
+                   "description": "Latest approved forecast reflecting updated assumptions and execution timing.",
+                   "type": "line",
+                   "data": [0.0, 5.8, 5.8, 5.8, 5.8, 6.0, 11.0, 14.0, 18.0, 22.0, 22.0, 22.0, 25.0]
+                },
+                {
+                   "label": "CCaR Actuals",
+                   "description": "Actual spending recorded through the CCaR reporting process.",
+                   "type": "line",
+                   "data": [0.0, 5.8, 5.8, 5.8, 5.8, 5.8, null, null, null, null, null, null, null]
+                },
+                {
+                   "label": "DFAS Actuals",
+                   "description": "Actual disbursements recorded by DFAS.",
+                   "type": "line",
+                   "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, null, null, null, null, null, null, null]
+                },
+                {
+                   "label": "OSD Goals",
+                   "description": "Cumulative obligation goals provided by OSD for FY 2026.",
+                   "type": "line",
+                   "data": [0.5, 0.9, 1.4, 1.8, 2.3, 2.7, 3.2, 3.6, 4.1, 4.5, 5.0, 5.4, null]
+                },
+                {
+                   "label": "Budget Authorized",
+                   "description": "Total budget authority approved and available for obligation.",
+                   "type": "line",
+                   "data": [5.0, 5.0, 15.0, 15.0, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0]
+                }
+             ],
+             "kpis": [
+                {"label": "CCaR Actuals Through Mar", "value": 5800000},
+                {"label": "Total Budget Authorized", "value": 25000000},
+                {"label": "Current Forecast to Completion", "value": 25000000}
+             ],
+             "xcategories": [
+                "OCT", "NOV", "DEC", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "TO COMP"
+             ]
+          }
+       }
+    ]
+};
