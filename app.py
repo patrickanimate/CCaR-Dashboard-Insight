@@ -18,7 +18,12 @@ st.markdown("""
     
     /* Sparkle Button styling */
     .sparkle-btn { cursor: pointer; font-size: 24px; transition: 0.3s; }
-    .sparkle-btn:hover { transform: scale(1.2); color: #3b82f6; }
+    .sparkle-btn:hover { transform: scale(1.2); color: ##3b82f6;}
+}
+    .sparkle-btn:hover { 
+        transform: scale(1.2); 
+        color: #60a5fa; /
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -102,12 +107,15 @@ with left:
 
 with right:
     st.markdown("### 🤖 AI-Powered Insights")
+    
+    # Wrap the AI results in a collapsible expander
     if st.session_state.ai_generated:
-        for insight in st.session_state.ai_content["insights"]:
-            st.markdown(f'<div class="insight-card">{insight}</div>', unsafe_allow_html=True)
-        
-        st.markdown("### ✅ Recommended Actions")
-        for action in st.session_state.ai_content["actions"]:
-            st.success(action)
+        with st.expander("View Generated Intelligence", expanded=True):
+            for insight in st.session_state.ai_content["insights"]:
+                st.markdown(f'<div class="insight-card">{insight}</div>', unsafe_allow_html=True)
+            
+            st.markdown("### ✅ Recommended Actions")
+            for action in st.session_state.ai_content["actions"]:
+                st.success(action)
     else:
         st.markdown("*Awaiting intelligence generation...*")
