@@ -66,21 +66,57 @@ def toggle_intelligence():
     st.session_state.show_insights = not st.session_state.show_insights
     
     if st.session_state.show_insights and not st.session_state.data_fetched:
+        # UPDATED: New SIP Logic Signature Prompt
         prompt = f"""
-        Analyze the following CCaR budget data and provide strategic insights.
-        Data: {json.dumps(data_raw)}
+        You are an expert DoD Financial Analyst Agent operating as the Sovereign Intelligence Platform (SIP) logic engine for CCaR. Your objective is to process the provided Budget Execution Chart Data and return a deterministic, highly structured assessment.
+        You must not hallucinate, you must not calculate math without index-matching, and you must not invent business context (e.g., do not guess about "payment delays").
+
+        PHASE 1: DATA GROUNDING & EXTRACTION
+        Before generating any insight, you must internally isolate the "Current State" using these exact steps:
+
+        Locate the "CCaR Actuals" array. Find the index position of the LAST non-null value. This is the "Current Month".
+        Extract the exact numerical value at that exact index for:
+        CCaR Actuals (Obligations)
+        OSD Goals (Minimum cumulative targets)
+        Current Forecast (Expected execution)
         
-        Return your response EXACTLY as a JSON object with this exact structure:
+        PHASE 2: DETERMINISTIC LOGIC GATES
+        Evaluate the extracted numbers through these strict financial rules:
+
+        GATE A (Pacing Check): Compare CCaR Actuals to OSD Goals at the Current Month index. OSD Goals are minimums. If Actuals are greater than Goals, execution is strong. If Actuals are less than Goals, flag a shortfall.
+        GATE B (Drift Check): Compare the Baseline Forecast array to the Current Forecast array. Identify if the plan was drastically reduced or shifted to the out-years ("TO COMP").
+        GATE C (Accounting Lag): Note the difference between CCaR Actuals (Obligations) and DFAS Actuals (Disbursements). In DoD finance, DFAS naturally trails CCaR. You MUST NEVER flag this lag as a "risk," "divergence," or "reconciliation issue."
+        
+        PHASE 3: OUTPUT SYNTHESIS
+        You must format your findings for a mixed audience (Commanders, Analysts, Resource Advisors).
+
+        Tone: Objective, BLUF (Bottom Line Up Front), and highly professional.
+        Structure: Every insight must use the strict "What we see / Why it matters" structure.
+        Actions: Every action must use the "What to consider" structure.
+        
+        REQUIRED OUTPUT SCHEMA
+        You must return ONLY a valid JSON object matching the exact structure below. Do not wrap it in markdown code blocks (no ```json). Do not include conversational filler.
         {{
-            "summary": "A 3-sentence executive summary. DO NOT use markdown, bolding, or headers.",
+            "summary": "[1 to 2 sentences summarizing overall execution health based on Gate A and Gate B. Be concise.]",
             "insights": [
-                {{"title": "Insight Title 1", "description": "Detailed explanation 1"}},
-                {{"title": "Insight Title 2", "description": "Detailed explanation 2"}},
-                {{"title": "Insight Title 3", "description": "Detailed explanation 3"}},
-                {{"title": "Insight Title 4", "description": "Detailed explanation 4"}}
+                {{
+                    "title": "[Short, professional headline, e.g., 'Significant Forecast Reduction']",
+                    "value": "What we see: [1 sentence stating the exact numeric variance from the data]. Why it matters: [1 sentence stating the objective financial impact or risk]."
+                }},
+                {{
+                    "title": "[Short, professional headline, e.g., 'Execution vs. OSD Goal']",
+                    "value": "What we see: [1 sentence stating Actuals vs Goals]. Why it matters: [1 sentence explaining if the portfolio is keeping pace]."
+                }}
             ],
-            "actions": ["Recommended Action 1", "Recommended Action 2"]
+            "actions": [
+                {{
+                    "value": "What to consider: [1 concise sentence suggesting what the analyst should review next in CCaR to validate the findings. Do not prescribe policy decisions.]"
+                }}
+            ]
         }}
+        
+        DATA TO ANALYZE:
+        {json.dumps(data_raw)}
         """
         try:
             response = client.chat.completions.create(
@@ -102,7 +138,6 @@ def handle_chat():
     if user_q:
         st.session_state.messages.append({"role": "user", "content": user_q})
         
-        # System prompt for the chat context
         sys_prompt = f"You are a budget analyst. Answer questions based ONLY on this data: {json.dumps(data_raw)}. Keep answers concise."
         
         try:
@@ -114,7 +149,6 @@ def handle_chat():
         except Exception as e:
             st.session_state.messages.append({"role": "assistant", "content": f"Error: {e}"})
         
-        # Clear the input box after submission
         st.session_state.user_query = ""
 
 # 6. RENDER UI - KPI HEADER
@@ -146,11 +180,10 @@ with left:
     )
     st.plotly_chart(fig, use_container_width=True)
     
-    # TABBED SUMMARY (Font Fixed)
+    # TABBED SUMMARY
     tab_summary, tab_desc = st.tabs(["📝 Summary", "ℹ️ Description"])
     with tab_summary:
         if st.session_state.show_insights and st.session_state.data_fetched:
-            # Wrapped in a div with explicit font styling to prevent resizing issues
             summary_text = st.session_state.ai_content.get("summary", "")
             st.markdown(f'<div style="font-size: 1rem; line-height: 1.5; opacity: 0.85;">{summary_text}</div>', unsafe_allow_html=True)
         else:
@@ -164,25 +197,25 @@ with right:
         st.markdown("### 🤖 AI-Powered Insights")
         
         border_colors = ["#8db6d9", "#f5b066", "#9bd3a1", "#94a3b8"]
+        # UPDATED: Use insight["value"] instead of description to match the new schema
         for i, insight in enumerate(st.session_state.ai_content.get("insights", [])):
             b_color = border_colors[i % len(border_colors)]
             st.markdown(f'''
                 <div class="insight-card" style="border-left: 5px solid {b_color};">
-                    <div class="insight-title">{insight["title"]}</div>
-                    <div class="insight-text">{insight["description"]}</div>
+                    <div class="insight-title">{insight.get("title", "")}</div>
+                    <div class="insight-text">{insight.get("value", "")}</div>
                 </div>
             ''', unsafe_allow_html=True)
         
         st.markdown("### ✅ Recommended Actions")
+        # UPDATED: Use action["value"] because actions are now objects, not plain strings
         for action in st.session_state.ai_content.get("actions", []):
-            st.success(action)
+            st.success(action.get("value", ""))
             
         st.divider()
         
         # --- INTERACTIVE CHAT SECTION ---
         st.markdown("### 💬 Ask about this data")
-        
-        # Scrollable container for chat history
         chat_container = st.container(height=300)
         with chat_container:
             for m in st.session_state.messages:
@@ -191,5 +224,4 @@ with right:
                 else:
                     st.markdown(f'<div class="chat-ai"><b>✨ AI:</b> {m["content"]}</div>', unsafe_allow_html=True)
         
-        # Chat input box at the bottom
         st.text_input("Type your question here...", key="user_query", on_change=handle_chat)
