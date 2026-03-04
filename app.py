@@ -29,7 +29,6 @@ if 'ai_content' not in st.session_state:
     st.session_state.ai_content = {"summary": "", "insights": [], "actions": []}
 
 # 3. DATA LOAD (From your JSON)
-# (For the prototype, we keep the JSON reference, but the prompt will extract the text)
 with open('Budget Execution Chart Data.json', 'r') as f:
     content = f.read()
     json_string = content.split('=', 1)[-1].strip().rstrip(';')
@@ -40,11 +39,10 @@ chart_data = data_raw["widgets"][0]["chart"]
 # 4. PROMPT TRIGGER FUNCTION
 def trigger_intelligence():
     st.session_state.ai_generated = True
-    # Your System Prompt goes here to generate the insights dynamically
+    # System Prompt for dynamic generation
     sys_prompt = f"Analyze this CCaR data and generate: 1. A summary, 2. Four key insights, 3. Two actions. Data: {json.dumps(data_raw)}"
     
-    # Placeholder for OpenAI call to populate st.session_state.ai_content
-    # response = client.chat.completions.create(...)
+    # This is where your live OpenAI call will populate the content
     st.session_state.ai_content = {
         "summary": "AI Generated Summary would appear here based on your prompt...",
         "insights": ["Insight 1", "Insight 2", "Insight 3", "Insight 4"],
@@ -69,7 +67,7 @@ with left:
         if st.button("✨", help="Generate AI Insights"):
             trigger_intelligence()
 
-    # LINE CHART WITH DOLLAR-FIRST TOOLTIPS
+    # LINE CHART SETUP
     df = pd.DataFrame({"Month": chart_data["xcategories"]})
     for s in chart_data["series"]:
         df[s["label"]] = s["data"]
@@ -77,21 +75,21 @@ with left:
     fig = px.line(df, x="Month", y=[s["label"] for s in chart_data["series"]], 
                   markers=True, template="plotly_dark")
     
-    # Force tooltip to show Dollar Amount prominently
+    # 1. Force tooltip to show Dollar Amount prominently
     fig.update_traces(hovertemplate='<b>%{y}M</b><br>%{x}') 
-    st.plotly_chart(fig, use_container_width=True)
-    # --- ADD THESE LINES HERE ---
+    
+    # 2. Move Legend to bottom (Corrected placement)
     fig.update_layout(
         legend=dict(
-            orientation="h",   # horizontal legend
+            orientation="h",   # horizontal
             yanchor="bottom",
             y=-0.5,            # pushes it below the chart
             xanchor="center",
             x=0.5              # centers it
         )
     )
-    # ----------------------------
 
+    # 3. Render the single chart
     st.plotly_chart(fig, use_container_width=True)
     
     # TABBED SUMMARY SECTION
