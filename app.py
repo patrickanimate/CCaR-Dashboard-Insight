@@ -98,10 +98,10 @@ def toggle_intelligence():
         REQUIRED OUTPUT SCHEMA
         Return ONLY a valid JSON object matching the exact structure below. Do not wrap it in markdown code blocks.
         {{
-            "summary": "[2-3 sentences summarizing the overall execution health. Base your summary entirely on the results of the Logic Gates evaluated in Phase 2.]",
+            "summary": "[3 to 4 sentences weaving the story of the budget. Sentence 1: State Current Month CCaR Actuals vs OSD Goals, explicitly noting if execution has been stagnant. Sentence 2: Address the credibility. Sentence 3: Summarize the primary execution risk.]",
             "insights": [
                 {{
-                    "title": "[Create a short, professional title based on the most critical Logic Gate finding (e.g., 'Execution Pacing & Disbursement Lag' or 'Deferred Execution & Forecast Drift')]",
+                    "title": "[Concise, professional title based on the most critical Logic Gate finding (e.g., 'Execution Pacing & Disbursement Lag' or 'Deferred Execution & Forecast Drift')]",
                     "value": "**Observation:** [1 sentence stating the exact numeric reality found in the data].\\n\\n**Impact:** [1 sentence explaining the financial consequence of this observation]."
                 }}
             ],
@@ -113,8 +113,8 @@ def toggle_intelligence():
         }}
 
         CONSTRAINTS:
-        Generate exactly 1 to 3 items in the "insights" array. Only generate an insight if the data warrants it.
-        Generate exactly 1 to 2 items in the "actions" array.
+        Generate exactly 1 to 4 items in the "insights" array. Only generate an insight if the data warrants it.
+        Generate exactly 1 to 3 items in the "actions" array.
         
         DATA TO ANALYZE:
         {json.dumps(data_raw)}
