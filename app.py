@@ -85,13 +85,13 @@ def toggle_intelligence():
 
         GATE A (Obligation Pacing & Stalled Execution): Compare [Current Month CCaR Actuals] to [Current Month OSD Goals]. Note if Actuals exceed Goals. However, if the CCaR Actuals array shows stagnation over recent months, flag this as a "stalled execution risk" despite currently beating the minimum OSD Goal.
         GATE B (Disbursement Lag / ULO Check): If [Current Month CCaR Actuals] > 0 but [Current Month DFAS Actuals] == 0, note that recorded obligations have not yet translated to disbursements (creating Unliquidated Obligations / ULOs). This is a primary indicator to verify that obligations are actively executing.
-        GATE C (Forecast Slippage & Plan Variance): Compare the [Current Month Baseline Forecast] to the [Current Month Current Forecast]. If the Current Forecast is significantly lower than the Baseline at this specific month, planned execution has been drastically deferred to the right. Note the exact numeric gap.
-        GATE D (Year-End Execution Risk & The Bow Wave): Calculate the unexecuted balance required by subtracting [Current Month CCaR Actuals] from the [EOY Current Forecast]. Highlight that obligating this massive remaining balance in the compressed time frame creates a high-risk "bow wave," requiring an extreme acceleration in execution velocity that heavily contradicts the current stagnation.
+        GATE C (Forecast Slippage & Plan Variance): Compare the [Current Month Baseline Forecast] to the [Current Month Current Forecast]. If the Current Forecast is significantly lower than the Baseline at this specific month, note the exact numeric gap to show how planned execution has been deferred.
+        GATE D (Year-End Execution Risk): Calculate the unexecuted balance required by subtracting [Current Month CCaR Actuals] from the [EOY Current Forecast]. Highlight that obligating this remaining balance in the compressed time frame creates a "schedule risk," requiring a significant increase in "execution velocity" that contradicts the current stagnation.
         
         PHASE 3: OUTPUT SYNTHESIS
         Format your findings for a mixed audience (Commanders, Analysts, Resource Advisors).
 
-        Tone: Objective, application-focused, analytical, and professionally skeptical of manual forecasts.
+        Tone: Objective, analytical, application-focused, and professionally skeptical of manual forecasts. Use standard DoD financial terminology.
         Structure: Every insight must stack "**Observation:**" and "**Impact:**" using markdown line breaks (\\n\\n).
         Formatting Rule: ALL numeric values must be properly formatted as currency with an "M" suffix for millions or "K" for thousands (e.g., "$5.8M", "$25.0M"). Do not output raw floats.
         
