@@ -91,7 +91,7 @@ def toggle_intelligence():
         PHASE 3: OUTPUT SYNTHESIS
         Format your findings for a mixed audience (Commanders, Analysts, Resource Advisors).
 
-        Tone: Objective, analytical, application-focused, and professionally skeptical of manual forecasts. Use standard DoD financial terminology.
+        Tone & Word Economy: Concise, direct, objective, analytical, application-focused, and professionally skeptical of manual forecasts. THE PLAIN ENGLISH RULE: Outside of the required DoD terminology, you must use simple, everyday words (8th-grade reading level). BANNED AI WORDS: Do NOT use academic filler words such as: "necessitating," "utilizing," "furthermore," "moreover," "additionally," "leverage," "facilitate," or "therefore."
         Structure: Every insight must stack "**Observation:**" and "**Impact:**" using markdown line breaks (\\n\\n).
         Formatting Rule: ALL numeric values must be properly formatted as currency with an "M" suffix for millions or "K" for thousands (e.g., "$5.8M", "$25.0M"). Do not output raw floats.
         
