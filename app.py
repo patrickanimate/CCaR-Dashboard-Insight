@@ -83,10 +83,10 @@ def toggle_intelligence():
         PHASE 2: DETERMINISTIC LOGIC GATES
         Evaluate the extracted numbers through these strict financial rules to build the execution story:
 
-        GATE A (Pacing & The Freeze): Compare [Current Month CCaR Actuals] to [Current Month OSD Goals]. Note if Actuals exceed Goals. However, if the CCaR Actuals array shows stagnation over recent months, flag this as a pacing risk despite currently beating the minimum OSD Goal.
-        GATE B (The DFAS Reality Check): If [Current Month CCaR Actuals] > 0 but [Current Month DFAS Actuals] == 0, note that recorded obligations have not yet translated to disbursements. This is a primary driver to verify the actuals are real.
-        GATE C (The Shift / Mid-Year Drift): Compare the [Current Month Baseline Forecast] to the [Current Month Current Forecast]. If the Current Forecast is significantly lower than the Baseline at this specific month, planned execution has been drastically delayed. Note the exact numeric gap.
-        GATE D (The Mountain / Recovery Feasibility): Calculate the remaining execution required by subtracting [Current Month CCaR Actuals] from the [EOY Current Forecast]. Question if executing this remaining amount in the time left is historically feasible, given the current stagnation.
+        GATE A (Obligation Pacing & Stalled Execution): Compare [Current Month CCaR Actuals] to [Current Month OSD Goals]. Note if Actuals exceed Goals. However, if the CCaR Actuals array shows stagnation over recent months, flag this as a "stalled execution risk" despite currently beating the minimum OSD Goal.
+        GATE B (Disbursement Lag / ULO Check): If [Current Month CCaR Actuals] > 0 but [Current Month DFAS Actuals] == 0, note that recorded obligations have not yet translated to disbursements (creating Unliquidated Obligations / ULOs). This is a primary indicator to verify that obligations are actively executing.
+        GATE C (Forecast Slippage & Plan Variance): Compare the [Current Month Baseline Forecast] to the [Current Month Current Forecast]. If the Current Forecast is significantly lower than the Baseline at this specific month, planned execution has been drastically deferred to the right. Note the exact numeric gap.
+        GATE D (Year-End Execution Risk & The Bow Wave): Calculate the unexecuted balance required by subtracting [Current Month CCaR Actuals] from the [EOY Current Forecast]. Question if obligating this remaining balance in the time left presents a high execution risk or creates an unmanageable late-year "bow wave," given the current execution stagnation.
         
         PHASE 3: OUTPUT SYNTHESIS
         Format your findings for a mixed audience (Commanders, Analysts, Resource Advisors).
